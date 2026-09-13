@@ -2,124 +2,398 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Custom Discord Webhook Sender</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discord Webhook Studio</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+      --bg-dark: #111214;
+      --panel-bg: rgba(43, 45, 49, 0.6);
+      --input-bg: #1e1f22;
+      --text-main: #f2f3f5;
+      --text-muted: #b5bac1;
+      --blurple: #5865f2;
+      --blurple-hover: #4752c4;
+      --border: rgba(255, 255, 255, 0.08);
+      --success: #23a55a;
+      --danger: #da373c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      max-width: 500px;
-      margin: 40px auto;
+      font-family: 'Inter', sans-serif;
+      /* Sleek dark gradient background */
+      background: linear-gradient(135deg, #111214 0%, #1e1f22 100%);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
       padding: 20px;
     }
-    .field {
-      margin-bottom: 15px;
+
+    /* Glassmorphism Card Effect */
+    .studio-container {
+      background: var(--panel-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      width: 100%;
+      max-width: 600px;
+      border-radius: 16px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+      transform: translateY(20px);
     }
+
+    @keyframes slideUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Header styling */
+    .header {
+      padding: 30px 30px 20px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(30, 31, 34, 0.5);
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      background: linear-gradient(90deg, #fff, #b5bac1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* Form Layout */
+    .form-body {
+      padding: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
     label {
       display: block;
-      font-weight: bold;
-      margin-bottom: 5px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
     }
-    input[type="text"], textarea {
+
+    /* Inputs */
+    input[type="text"],
+    input[type="url"],
+    textarea {
       width: 100%;
-      padding: 8px;
-      box-sizing: border-box;
+      padding: 12px 16px;
+      background-color: var(--input-bg);
+      border: 1px solid transparent;
+      border-radius: 8px;
+      color: var(--text-main);
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: all 0.2s ease;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
     }
-    button {
-      padding: 10px 15px;
-      background-color: #5865F2;
+
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--blurple);
+      box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.2), inset 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+      line-height: 1.5;
+    }
+
+    /* Custom File Input */
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+    
+    .file-input-wrapper input[type="file"] {
+      font-size: 100px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      cursor: pointer;
+      height: 100%;
+    }
+
+    .file-custom-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background-color: var(--input-bg);
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px dashed var(--text-muted);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+
+    .file-input-wrapper:hover .file-custom-btn {
+      border-color: var(--blurple);
+      color: var(--text-main);
+      background-color: rgba(88, 101, 242, 0.05);
+    }
+
+    /* Send Button */
+    .btn-send {
+      width: 100%;
+      padding: 14px;
+      background-color: var(--blurple);
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
       cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
     }
-    button:hover {
-      background-color: #4752C4;
+
+    .btn-send:hover {
+      background-color: var(--blurple-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(88, 101, 242, 0.3);
     }
+
+    .btn-send:active {
+      transform: translateY(0);
+    }
+
+    /* Loading Spinner */
+    .loader {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--input-bg);
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast-success { border-left: 4px solid var(--success); }
+    .toast-error { border-left: 4px solid var(--danger); }
+
+    /* Custom Scrollbar for Textarea */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb {
+      background: var(--bg-dark);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover { background: #000; }
   </style>
 </head>
 <body>
 
-  <h2>Discord Webhook Sender</h2>
-
-  <form id="webhookForm">
-    <div class="field">
-      <label for="webhookUrl">Discord Webhook URL:</label>
-      <input 
-        type="text" 
-        id="webhookUrl" 
-        placeholder="https://discord.com/api/webhooks/..." 
-        required 
-      />
+  <div class="studio-container">
+    <div class="header">
+      <h1>Webhook Studio</h1>
+      <p>Configure and dispatch messages directly to your server.</p>
     </div>
 
-    <div class="field">
-      <label for="username">Custom Username (Optional):</label>
-      <input 
-        type="text" 
-        id="username" 
-        placeholder="e.g. My Website Bot" 
-      />
-    </div>
+    <div class="form-body">
+      <form id="webhookForm">
+        <div class="form-group">
+          <label for="webhookUrl">Target Webhook URL *</label>
+          <input type="url" id="webhookUrl" placeholder="https://discord.com/api/webhooks/..." required autocomplete="off" />
+        </div>
 
-    <div class="field">
-      <label for="userMessage">Message:</label>
-      <textarea 
-        id="userMessage" 
-        rows="4" 
-        placeholder="Type your message here..." 
-        required
-      ></textarea>
-    </div>
+        <div class="row">
+          <div class="form-group">
+            <label for="username">Bot Username</label>
+            <input type="text" id="username" placeholder="Override default name" autocomplete="off" />
+          </div>
+          <div class="form-group">
+            <label for="avatarUrl">Avatar URL</label>
+            <input type="url" id="avatarUrl" placeholder="https://..." autocomplete="off" />
+          </div>
+        </div>
 
-    <button type="submit">Send Message</button>
-  </form>
+        <div class="form-group">
+          <label>Image Attachment</label>
+          <div class="file-input-wrapper">
+            <div class="file-custom-btn" id="fileLabel">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+              <span>Click to upload a local image</span>
+            </div>
+            <input type="file" id="localFile" accept="image/*" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="userMessage">Message Content *</label>
+          <textarea id="userMessage" placeholder="Use Markdown like **bold** or *italics*..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn-send" id="sendBtn">
+          <span id="btnText">Dispatch Message</span>
+          <div class="loader" id="btnLoader"></div>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toastMsg"></div>
 
   <script>
     const form = document.getElementById("webhookForm");
     const webhookInput = document.getElementById("webhookUrl");
+    const usernameInput = document.getElementById("username");
+    const avatarInput = document.getElementById("avatarUrl");
+    const fileInput = document.getElementById("localFile");
+    const fileLabel = document.getElementById("fileLabel").querySelector("span");
+    const messageInput = document.getElementById("userMessage");
+    const sendBtn = document.getElementById("sendBtn");
+    const btnText = document.getElementById("btnText");
+    const btnLoader = document.getElementById("btnLoader");
+    const toast = document.getElementById("toastMsg");
 
-    // Automatically load saved webhook URL if available in local storage
-    if (localStorage.getItem("discord_webhook_url")) {
-      webhookInput.value = localStorage.getItem("discord_webhook_url");
+    // Load saved settings
+    if (localStorage.getItem("wh_url")) webhookInput.value = localStorage.getItem("wh_url");
+    if (localStorage.getItem("wh_user")) usernameInput.value = localStorage.getItem("wh_user");
+    if (localStorage.getItem("wh_avatar")) avatarInput.value = localStorage.getItem("wh_avatar");
+
+    // Update file label text when file is selected
+    fileInput.addEventListener("change", function() {
+      if (this.files && this.files.length > 0) {
+        fileLabel.textContent = this.files[0].name;
+        fileLabel.style.color = "var(--text-main)";
+      } else {
+        fileLabel.textContent = "Click to upload a local image";
+        fileLabel.style.color = "var(--text-muted)";
+      }
+    });
+
+    // Toast Notification System
+    function showToast(message, type) {
+      toast.textContent = message;
+      toast.className = `toast show toast-${type}`;
+      setTimeout(() => { toast.classList.remove("show"); }, 3500);
     }
 
+    // Handle Form Submission
     form.addEventListener("submit", function(event) {
       event.preventDefault();
 
       const webhookUrl = webhookInput.value.trim();
-      const username = document.getElementById("username").value.trim();
-      const message = document.getElementById("userMessage").value.trim();
+      const username = usernameInput.value.trim();
+      const avatarUrl = avatarInput.value.trim();
+      const message = messageInput.value.trim();
+      const selectedFile = fileInput.files[0];
 
-      // Save the webhook URL locally in the user's browser for convenience
-      localStorage.setItem("discord_webhook_url", webhookUrl);
+      // Save credentials locally
+      localStorage.setItem("wh_url", webhookUrl);
+      localStorage.setItem("wh_user", username);
+      localStorage.setItem("wh_avatar", avatarUrl);
 
-      // Build the JSON payload for Discord
-      const payload = {
-        content: message
-      };
+      // UI Loading State
+      sendBtn.disabled = true;
+      btnText.style.display = "none";
+      btnLoader.style.display = "block";
 
-      if (username !== "") {
-        payload.username = username;
-      }
+      const formData = new FormData();
+      const payload = { content: message };
 
-      // Send the HTTP request to Discord
+      if (username !== "") payload.username = username;
+      if (avatarUrl !== "") payload.avatar_url = avatarUrl;
+
+      formData.append("payload_json", JSON.stringify(payload));
+      if (selectedFile) formData.append("file", selectedFile);
+
+      // Execute Webhook
       fetch(webhookUrl, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
+        body: formData
       })
       .then(response => {
         if (response.ok) {
-          alert("Message sent successfully!");
-          document.getElementById("userMessage").value = "";
+          showToast("Message dispatched successfully!", "success");
+          messageInput.value = "";
+          fileInput.value = "";
+          fileLabel.textContent = "Click to upload a local image";
+          fileLabel.style.color = "var(--text-muted)";
         } else {
-          alert("Failed to send message. Please double-check your Webhook URL.");
+          showToast("Delivery failed. Check URL.", "error");
         }
       })
       .catch(error => {
-        console.error("Error:", error);
-        alert("An error occurred while attempting to send the message.");
+        showToast("Network error occurred.", "error");
+      })
+      .finally(() => {
+        // Reset UI State
+        sendBtn.disabled = false;
+        btnText.style.display = "block";
+        btnLoader.style.display = "none";
       });
     });
   </script>
